@@ -6,7 +6,7 @@ import { GNB } from "@/shared/consts";
 export default function Header() {
   return (
     <header className="w-full py-6">
-      <div className="w-7xl mx-auto flex items-center">
+      <div className="max-w-7xl w-full  mx-auto flex items-center">
         <Image width={207} height={32} src="/logo.png" alt="logo" />
         <nav className="w-full">
           <ul className="flex items-center justify-center gap-x-14">
