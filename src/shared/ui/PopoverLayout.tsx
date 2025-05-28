@@ -1,14 +1,14 @@
 "use client";
 import {
   createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
   useContext,
-  useEffect,
-  useRef,
   useState,
+  useRef,
+  type ReactNode,
+  type Dispatch,
+  type SetStateAction,
 } from "react";
+import Image from "next/image";
 
 interface IPopoverContextProps {
   open: boolean;
@@ -16,20 +16,16 @@ interface IPopoverContextProps {
   triggerRef: React.RefObject<HTMLButtonElement | null>;
 }
 
-interface ITriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: ReactNode;
-}
-
 const PopoverContext = createContext<IPopoverContextProps | null>(null);
 
 function usePopoverContext() {
   const context = useContext(PopoverContext);
-  if (!context) throw new Error("");
+  if (!context) throw new Error("Must be used inside PopoverLayout");
   return context;
 }
 
-export default function PopoverLayout({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState<boolean>(false);
+function Root({ children }: { children: ReactNode }) {
+  const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
   return (
@@ -39,30 +35,33 @@ export default function PopoverLayout({ children }: { children: ReactNode }) {
   );
 }
 
-function Trigger({ children, ...props }: ITriggerProps) {
+function Trigger({
+  children,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const { setOpen, triggerRef } = usePopoverContext();
-
   return (
-    <button
-      ref={triggerRef}
-      onClick={() => setOpen((prev) => !prev)}
-      {...props}
-    >
+    <button ref={triggerRef} onClick={() => setOpen((p) => !p)} {...props}>
       {children}
     </button>
   );
 }
 
 function Content({ children }: { children: ReactNode }) {
-  const { open, setOpen, triggerRef } = usePopoverContext();
-  const contentRef = useRef<HTMLDivElement>(null);
-
+  const { open } = usePopoverContext();
+  if (!open) return null;
   return (
-    <div ref={contentRef} className="">
+    <div className="absolute w-full mt-2 bg-white rounded-lg py-6 px-9 shadow-[0px_4px_14px_6px_#97979726]">
+      <button type="button" className="w-5">
+        <Image width={20} height={20} src="/close.png" alt="close" />
+      </button>
       {children}
     </div>
   );
 }
 
-PopoverLayout.Trigger = Trigger;
-PopoverLayout.Content = Content;
+export const PopoverLayout = {
+  Root,
+  Trigger,
+  Content,
+};
