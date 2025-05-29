@@ -1,34 +1,67 @@
-// src/shared/ui/SearchFilterBar.tsx
-"use client";
+import { useState, useRef, useCallback } from "react";
+import Image from "next/image";
 
-import {
-  useState,
-  type ReactNode,
-  type ChangeEvent,
-  type KeyboardEvent,
-} from "react";
-
-export interface Option {
+interface IOption {
+  label: string;
   value: string;
-  label: ReactNode;
 }
 
-interface SearchFilterBarProps {
-  options: Option[];
+interface ICustomSelectProps {
+  options: IOption[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
 }
 
-export function SearchFilterBar({ options }: SearchFilterBarProps) {
+export default function SelectBox({
+  options,
+  value,
+  onChange,
+  placeholder,
+  className,
+}: ICustomSelectProps) {
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const handleSelect = useCallback((optionValue: string) => {
+    onChange(optionValue);
+    setOpen(false);
+  }, []);
+
   return (
-    <div className="flex border-b border-gray-300 rounded-md overflow-hidden">
-      <div className="relative">
-        <select className="appearance-none px-3 py-2 pr-8 bg-transparent text-gray-700 focus:outline-none">
+    <div
+      className={`relative ${className}`}
+      ref={wrapperRef}
+      tabIndex={0}
+      onBlur={() => setOpen(false)}
+    >
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full text-sm p-2 border-b border-[#D2D6DA] text-left flex justify-between items-center"
+      >
+        <span className="text-sm font-bold">
+          {options.find((opt) => opt.value === value)?.label || placeholder}
+        </span>
+        <Image src="/chevron.png" width={12} height={12} alt="open" />
+      </button>
+
+      {open && (
+        <ul className="absolute z-10 mt-1 w-full bg-white shadow rounded max-h-48 overflow-auto">
           {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
+            <li
+              key={opt.value}
+              className={`px-3 py-2 cursor-pointer text-[#8D94A0] text-sm ${
+                opt.value === value ? "bg-gray-100 font-bold" : ""
+              }`}
+              onMouseDown={() => handleSelect(opt.value)}
+            >
               {opt.label}
-            </option>
+            </li>
           ))}
-        </select>
-      </div>
+        </ul>
+      )}
     </div>
   );
 }

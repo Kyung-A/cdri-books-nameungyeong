@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { IBook, IBooksData } from "@/shared/types";
-import { Button, Header, PopoverLayout, Search } from "@/shared/ui";
+import { Button, Header, PopoverLayout, Search, Selectbox } from "@/shared/ui";
 import axios from "axios";
 import Image from "next/image";
 
@@ -36,6 +36,10 @@ export default function Home() {
     [data]
   );
 
+  const hanldeSearchFilter = useCallback((e) => {
+    console.log(e);
+  }, []);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -58,7 +62,34 @@ export default function Home() {
               상세검색
             </PopoverLayout.Trigger>
             <PopoverLayout.Content>
-              <div></div>
+              <div className="flex gap-x-1 mt-2">
+                <Selectbox
+                  value=""
+                  onChange={hanldeSearchFilter}
+                  options={[
+                    {
+                      label: "저자명",
+                      value: "저자명",
+                    },
+                    {
+                      label: "출판사",
+                      value: "출판사",
+                    },
+                  ]}
+                  placeholder="제목"
+                  className="w-[100px]"
+                ></Selectbox>
+                <input
+                  type="search"
+                  className="border-b border-[#4880EE] outline-black w-[208px] p-2 text-sm placeholder:text-[#8D94A0]"
+                  placeholder="검색어 입력"
+                />
+              </div>
+              <Button
+                styleType="primary"
+                label="검색하기"
+                className="w-full mt-4 !py-[7px] !text-sm !font-medium"
+              />
             </PopoverLayout.Content>
           </PopoverLayout.Root>
         </div>
