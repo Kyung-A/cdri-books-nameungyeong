@@ -1,12 +1,10 @@
 export const GNB = [
   {
-    href: "search",
+    href: "/",
     name: "도서 검색",
-    active: true,
   },
   {
-    href: "bookmark",
+    href: "/bookmark",
     name: "내가 찜한 책",
-    active: false,
   },
 ];

@@ -1,9 +1,13 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { GNB } from "@/shared/consts";
 
 export default function Header() {
+  const pathname = usePathname();
+
   return (
     <header className="w-full py-6">
       <div className="max-w-7xl w-full  mx-auto flex items-center">
@@ -14,7 +18,7 @@ export default function Header() {
               <li
                 key={menu.href}
                 className={`font-medium relative ${
-                  menu.active
+                  menu.href === pathname
                     ? "after:absolute after:-bottom-1 after:block after:w-full after:h-px after:bg-[#4880EE]"
                     : ""
                 }`}

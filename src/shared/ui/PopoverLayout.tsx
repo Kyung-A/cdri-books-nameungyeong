@@ -18,7 +18,7 @@ interface IPopoverContextProps {
 
 const PopoverContext = createContext<IPopoverContextProps | null>(null);
 
-function usePopoverContext() {
+export function usePopoverContext() {
   const context = useContext(PopoverContext);
   if (!context) throw new Error("Must be used inside PopoverLayout");
   return context;
@@ -56,7 +56,7 @@ function Content({ children }: { children: ReactNode }) {
       <button
         type="button"
         onClick={() => setOpen(false)}
-        className="w-5 ml-auto block"
+        className="w-5 ml-auto block cursor-pointer"
       >
         <Image width={20} height={20} src="/close.png" alt="close" />
       </button>

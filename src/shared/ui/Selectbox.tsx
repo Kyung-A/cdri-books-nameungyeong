@@ -1,3 +1,4 @@
+"use client";
 import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
 
@@ -39,7 +40,7 @@ export default function SelectBox({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full text-sm p-2 border-b border-[#D2D6DA] text-left flex justify-between items-center"
+        className="w-full text-sm p-2 border-b border-[#D2D6DA] text-left flex justify-between items-center cursor-pointer"
       >
         <span className="text-sm font-bold">
           {options.find((opt) => opt.value === value)?.label || placeholder}
@@ -48,7 +49,7 @@ export default function SelectBox({
       </button>
 
       {open && (
-        <ul className="absolute z-10 mt-1 w-full bg-white shadow rounded max-h-48 overflow-auto">
+        <ul className="absolute z-10 mt-1 w-full bg-white shadow-[0px_4px_14px_6px_#97979726] rounded max-h-48 overflow-auto">
           {options.map((opt) => (
             <li
               key={opt.value}
