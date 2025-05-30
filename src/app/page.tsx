@@ -188,8 +188,8 @@ export default function Home() {
           <Search
             placeholder="검색어를 입력하세요."
             value={searchFilter.query}
-            onChange={(e) =>
-              setSerachFilter((prev) => ({ ...prev, query: e.target.value }))
+            onCustomChange={(e) =>
+              setSerachFilter((prev) => ({ ...prev, query: e }))
             }
             onRemove={removeSearchKeyword}
             keywords={keywords}

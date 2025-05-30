@@ -32,7 +32,7 @@ export default function BooksContainer({
           {pathname === "/bookmark" ? "찜한 책" : "도서 검색 결과"}
         </p>
         <p>
-          총 <span className="text-blue-500">{data?.length}</span>건
+          총 <span className="text-blue-500">{data?.length || 0}</span>건
         </p>
       </div>
       {data && data.length > 0 ? (
