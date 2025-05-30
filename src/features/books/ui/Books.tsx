@@ -6,10 +6,15 @@ import Link from "next/link";
 
 interface IBooksProps {
   data: IBook[];
+  handleClickDetail: (book: IBook) => void;
   handleClickBookmark: (book: IBook) => void;
 }
 
-export default function Books({ data, handleClickBookmark }: IBooksProps) {
+export default function Books({
+  data,
+  handleClickDetail,
+  handleClickBookmark,
+}: IBooksProps) {
   return (
     <ul className="w-full mt-9">
       {data?.map((book) => (
@@ -34,7 +39,11 @@ export default function Books({ data, handleClickBookmark }: IBooksProps) {
                   )}
                 </div>
                 <div className="absolute z-10 top-2 right-2">
-                  <button type="button" className="cursor-pointer">
+                  <button
+                    type="button"
+                    className="cursor-pointer"
+                    onClick={() => handleClickBookmark(book)}
+                  >
                     {book.bookmark ? (
                       <Image
                         src="/bookmark.png"
@@ -82,7 +91,7 @@ export default function Books({ data, handleClickBookmark }: IBooksProps) {
                     }
                     styleType="ghost"
                     className="px-5"
-                    onClick={() => handleClickBookmark(book)}
+                    onClick={() => handleClickDetail(book)}
                   />
                   <div className="w-full">
                     <p className="text-end">
@@ -110,7 +119,7 @@ export default function Books({ data, handleClickBookmark }: IBooksProps) {
                     <Link
                       href={book.url}
                       target="_blank"
-                      className="w-full block mt-7 !py-3 rounded-lg font-medium box-border border bg-[#4880EE] cursor-pointer text-white border-transparent"
+                      className="w-full block mt-7 !py-3 rounded-lg font-medium box-border border bg-[#4880EE] cursor-pointer text-white border-transparent text-center"
                     >
                       구매하기
                     </Link>
@@ -165,7 +174,7 @@ export default function Books({ data, handleClickBookmark }: IBooksProps) {
                   }
                   styleType="ghost"
                   className="px-5"
-                  onClick={() => handleClickBookmark(book)}
+                  onClick={() => handleClickDetail(book)}
                 />
               </div>
             </>

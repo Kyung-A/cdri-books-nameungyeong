@@ -12,7 +12,7 @@ export interface IBook {
   translators: string[];
   url: string;
   active?: boolean;
-  bookmark?: false;
+  bookmark?: boolean;
 }
 
 export interface IBooksMeta {

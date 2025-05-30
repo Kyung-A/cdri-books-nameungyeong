@@ -56,12 +56,12 @@ export default function Home() {
   }, []);
 
   const getSearchKeyword = useCallback(() => {
-    return localStorage.getItem("keyword") || [];
+    return localStorage.getItem("keyword");
   }, []);
 
   const saveSearchKeyword = useCallback(
     (keyword: string) => {
-      const keywords = JSON.parse(getSearchKeyword() as string);
+      const keywords = JSON.parse(getSearchKeyword() as string) || [];
       if (keywords.length >= 8) {
         keywords.pop();
       }
@@ -133,7 +133,7 @@ export default function Home() {
 
   const removeSearchKeyword = useCallback(
     (target: string) => {
-      const keywords = JSON.parse(getSearchKeyword() as string);
+      const keywords = JSON.parse(getSearchKeyword() as string) || [];
       const newValue = keywords.filter((v: string) => v !== target);
       localStorage.setItem("keyword", JSON.stringify(newValue));
       setKeywords(newValue);
@@ -146,7 +146,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const keywords = JSON.parse(getSearchKeyword() as string);
+    const keywords = JSON.parse(getSearchKeyword() as string) || [];
     if (!keywords) return;
     setKeywords(keywords);
   }, [getSearchKeyword]);

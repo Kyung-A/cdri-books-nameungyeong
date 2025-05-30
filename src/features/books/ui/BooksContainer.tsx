@@ -15,12 +15,43 @@ export default function BooksContainer({
   setData,
   pathname,
 }: IBooksContainer) {
-  const handleClickBookmark = useCallback(
+  const handleClickDetail = useCallback(
     (book: IBook) => {
       const newData = data?.map((v) =>
-        v.isbn === book.isbn ? { ...v, active: !v.active } : v
+        v.url === book.url ? { ...v, active: !v.active } : v
       );
       setData((prev) => ({ ...prev, documents: newData }));
+    },
+    [data, setData]
+  );
+
+  const handleClickBookmark = useCallback(
+    (book: IBook) => {
+      const newBookmarkState = !book.bookmark;
+      const newBookData = { ...book, bookmark: newBookmarkState };
+
+      setData((prev) => ({
+        ...prev,
+        documents: prev?.documents?.map((v) =>
+          v.url === book.url ? newBookData : v
+        ),
+      }));
+
+      const raw = localStorage.getItem("bookmark");
+      const list: IBook[] = raw ? JSON.parse(raw) : [];
+
+      if (newBookmarkState) {
+        const exists = list.some((v) => v.url === book.url);
+        if (!exists) {
+          list.push(newBookData);
+        }
+      } else {
+        const filtered = list.filter((v) => v.url !== book.url);
+        localStorage.setItem("bookmark", JSON.stringify(filtered));
+        return;
+      }
+
+      localStorage.setItem("bookmark", JSON.stringify(list));
     },
     [data, setData]
   );
@@ -36,7 +67,11 @@ export default function BooksContainer({
         </p>
       </div>
       {data && data.length > 0 ? (
-        <Books data={data} handleClickBookmark={handleClickBookmark} />
+        <Books
+          data={data}
+          handleClickDetail={handleClickDetail}
+          handleClickBookmark={handleClickBookmark}
+        />
       ) : (
         <BookListEmpty />
       )}
