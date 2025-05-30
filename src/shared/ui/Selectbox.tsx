@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 
 interface IOption {
@@ -9,9 +9,8 @@ interface IOption {
 
 interface ICustomSelectProps {
   options: IOption[];
-  value: string;
+  value?: string | null;
   onChange: (value: string) => void;
-  placeholder?: string;
   className?: string;
 }
 
@@ -19,7 +18,6 @@ export default function SelectBox({
   options,
   value,
   onChange,
-  placeholder,
   className,
 }: ICustomSelectProps) {
   const [open, setOpen] = useState(false);
@@ -27,8 +25,13 @@ export default function SelectBox({
 
   const handleSelect = useCallback((optionValue: string) => {
     onChange(optionValue);
-    setOpen(false);
   }, []);
+
+  useEffect(() => {
+    if (!value || value === "") {
+      onChange(options[0].value);
+    }
+  }, [onChange, options, value]);
 
   return (
     <div
@@ -43,7 +46,7 @@ export default function SelectBox({
         className="w-full text-sm p-2 border-b border-[#D2D6DA] text-left flex justify-between items-center cursor-pointer"
       >
         <span className="text-sm font-bold">
-          {options.find((opt) => opt.value === value)?.label || placeholder}
+          {options.find((opt) => opt.value === value)?.label}
         </span>
         <Image src="/chevron.png" width={12} height={12} alt="open" />
       </button>

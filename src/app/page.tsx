@@ -1,18 +1,22 @@
 "use client";
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { Button, PopoverLayout, Search, Selectbox } from "@/shared/ui";
 import { BookList } from "@/features/books/ui";
 import { IBook, IBooksData } from "@/shared/types";
 import axios from "axios";
+import { filterOptions } from "@/shared/consts";
 
 interface ISearchFilter {
   query: string;
   page: number;
   size: number;
-  target?: string;
+  target?: string | null;
+  targetQuery?: string | null;
 }
 
 export default function Home() {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [searchFilter, setSerachFilter] = useState<ISearchFilter>({
     query: "",
     page: 1,
@@ -23,7 +27,6 @@ export default function Home() {
   const [isOpenAutoComplete, setOpenAutoComplete] = useState<boolean>(false);
 
   const fetchData = useCallback(async (search?: string) => {
-    console.log(search);
     const {
       data: { documents, meta },
     } = await axios.get(
@@ -64,6 +67,7 @@ export default function Home() {
       e.preventDefault();
 
       const queryString = Object.entries(searchFilter)
+        .filter(([key]) => key !== "targetQuery")
         .map(([key, value]) => `${key}=${value}`)
         .join("&");
 
@@ -76,22 +80,46 @@ export default function Home() {
         return [searchFilter.query, ...prev];
       });
       setOpenAutoComplete(false);
+      setSerachFilter((prev) => ({ ...prev, target: null, targetQuery: null }));
     },
     [fetchData, saveSearchKeyword, searchFilter]
+  );
+
+  const handleDetailSearch = useCallback(
+    async (e: FormEvent) => {
+      e.preventDefault();
+
+      const detailFilter = {
+        ...searchFilter,
+        query:
+          searchFilter.target && searchFilter.targetQuery
+            ? searchFilter.targetQuery
+            : "",
+      };
+
+      const queryString = Object.entries(detailFilter)
+        .filter(([key]) => key !== "targetQuery")
+        .map(([key, value]) => `${key}=${value}`)
+        .join("&");
+
+      await fetchData(queryString);
+      setSerachFilter((prev) => ({ ...prev, query: "" }));
+    },
+    [fetchData, searchFilter]
   );
 
   const removeSearchKeyword = useCallback(
     (target: string) => {
       const keywords = JSON.parse(getSearchKeyword() as string);
-      const newValue = keywords.filter((v) => v !== target);
+      const newValue = keywords.filter((v: string) => v !== target);
       localStorage.setItem("keyword", JSON.stringify(newValue));
       setKeywords(newValue);
     },
     [getSearchKeyword]
   );
 
-  const hanldeSearchFilter = useCallback((e) => {
-    console.log(e);
+  const handleSearchFilter = useCallback((value: string) => {
+    setSerachFilter((prev) => ({ ...prev, query: "", target: value }));
   }, []);
 
   useEffect(() => {
@@ -120,44 +148,45 @@ export default function Home() {
             keywords={keywords}
             isOpenAutoComplete={isOpenAutoComplete}
             setOpenAutoComplete={setOpenAutoComplete}
+            ref={inputRef}
           />
         </form>
         <PopoverLayout.Root>
           <PopoverLayout.Trigger
-            className="border border-[#8D94A0] text-[#8D94A0] py-[5px] px-[10px] rounded-md font-medium text-sm"
+            className="border border-[#8D94A0] text-[#8D94A0] py-[5px] px-[10px] rounded-md font-medium text-sm flex "
             type="button"
           >
             상세검색
           </PopoverLayout.Trigger>
           <PopoverLayout.Content>
-            <div className="flex gap-x-1 mt-2">
-              <Selectbox
-                value=""
-                onChange={hanldeSearchFilter}
-                options={[
-                  {
-                    label: "저자명",
-                    value: "저자명",
-                  },
-                  {
-                    label: "출판사",
-                    value: "출판사",
-                  },
-                ]}
-                placeholder="제목"
-                className="w-[100px]"
-              ></Selectbox>
-              <input
-                type="search"
-                className="border-b border-[#4880EE] outline-black w-[208px] p-2 text-sm placeholder:text-[#8D94A0]"
-                placeholder="검색어 입력"
+            <form onSubmit={handleDetailSearch}>
+              <div className="flex gap-x-1 mt-2">
+                <Selectbox
+                  value={searchFilter.target}
+                  onChange={handleSearchFilter}
+                  options={filterOptions}
+                  className="w-[100px]"
+                />
+                <input
+                  type="search"
+                  className="border-b border-[#4880EE] outline-black w-[208px] p-2 text-sm placeholder:text-[#8D94A0]"
+                  placeholder="검색어 입력"
+                  value={searchFilter.targetQuery || ""}
+                  onChange={(e) =>
+                    setSerachFilter((prev) => ({
+                      ...prev,
+                      targetQuery: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+              <Button
+                type="submit"
+                styleType="primary"
+                label="검색하기"
+                className="w-full mt-4 !py-[7px] !text-sm !font-medium"
               />
-            </div>
-            <Button
-              styleType="primary"
-              label="검색하기"
-              className="w-full mt-4 !py-[7px] !text-sm !font-medium"
-            />
+            </form>
           </PopoverLayout.Content>
         </PopoverLayout.Root>
       </div>
