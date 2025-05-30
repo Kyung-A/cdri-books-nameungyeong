@@ -1,27 +1,37 @@
 "use client";
+import { IBook } from "@/shared/types";
 import { Button } from "@/shared/ui";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Books({ data, handleClickBookmark }) {
+interface IBooksProps {
+  data: IBook[];
+  handleClickBookmark: (book: IBook) => void;
+}
+
+export default function Books({ data, handleClickBookmark }: IBooksProps) {
   return (
     <ul className="w-full mt-9">
       {data?.map((book) => (
         <li
-          key={book.isbn}
+          key={book.url}
           className="flex items-center justify-between pl-12 pr-4 py-4 border-b border-[#D2D6DA] w-full"
         >
           {book.active ? (
             <div className="w-full h-full flex py-6">
               <div className="relative">
                 <div className="w-[210px] h-[280px]">
-                  <Image
-                    src={book.thumbnail}
-                    width={210}
-                    height={280}
-                    alt="book thumbnail"
-                    className="w-full h-full"
-                  />
+                  {book.thumbnail !== "" ? (
+                    <Image
+                      src={book.thumbnail}
+                      width={210}
+                      height={280}
+                      alt="book thumbnail"
+                      className="w-full h-full"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100"></div>
+                  )}
                 </div>
                 <div className="absolute z-10 top-2 right-2">
                   <button type="button" className="cursor-pointer">
@@ -110,12 +120,19 @@ export default function Books({ data, handleClickBookmark }) {
             </div>
           ) : (
             <>
-              <Image
-                src={book.thumbnail}
-                width={45}
-                height={68}
-                alt="book thumbnail"
-              />
+              <div className="w-[45px] h-[68px]">
+                {book.thumbnail !== "" ? (
+                  <Image
+                    src={book.thumbnail}
+                    width={45}
+                    height={68}
+                    alt="book thumbnail"
+                    className="w-full h-full"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-100"></div>
+                )}
+              </div>
               <div className="flex items-center justify-start w-full max-w-[408px] gap-x-4">
                 <p className="font-bold text-lg">{book.title}</p>
                 <p className="font-medium text-[#6D7582] text-sm">

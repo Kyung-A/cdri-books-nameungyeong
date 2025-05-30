@@ -6,19 +6,25 @@ import { IBook, IBooksData } from "@/shared/types";
 import axios from "axios";
 import { filterOptions } from "@/shared/consts";
 
-interface ISearchFilter {
-  query: string;
+interface IPaging {
   page: number;
   size: number;
-  target?: string | null;
-  targetQuery?: string | null;
+}
+
+interface ISearchFilter {
+  query: string;
+  target?: string;
+  targetQuery?: string;
 }
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const [searchFilter, setSerachFilter] = useState<ISearchFilter>({
     query: "",
+  });
+  const [paging, setpaging] = useState<IPaging>({
     page: 1,
     size: 10,
   });
@@ -43,7 +49,10 @@ export default function Home() {
       active: false,
       bookmark: false,
     }));
-    setData({ documents: data, meta });
+    setData((prev) => ({
+      documents: prev?.documents ? [...prev.documents, ...data] : data,
+      meta,
+    }));
   }, []);
 
   const getSearchKeyword = useCallback(() => {
@@ -62,39 +71,15 @@ export default function Home() {
     [getSearchKeyword]
   );
 
-  const handleSearch = useCallback(
-    async (e: FormEvent) => {
-      e.preventDefault();
-
-      const queryString = Object.entries(searchFilter)
-        .filter(([key]) => key !== "targetQuery")
-        .map(([key, value]) => `${key}=${value}`)
-        .join("&");
-
-      await fetchData(queryString);
-      saveSearchKeyword(searchFilter.query);
-      setKeywords((prev) => {
-        if (prev.length >= 8) {
-          prev.pop();
-        }
-        return [searchFilter.query, ...prev];
-      });
-      setOpenAutoComplete(false);
-      setSerachFilter((prev) => ({ ...prev, target: null, targetQuery: null }));
-    },
-    [fetchData, saveSearchKeyword, searchFilter]
-  );
-
-  const handleDetailSearch = useCallback(
-    async (e: FormEvent) => {
-      e.preventDefault();
-
+  const changefilterString = useCallback(
+    async (page?: IPaging) => {
       const detailFilter = {
         ...searchFilter,
+        ...(page ? page : paging),
         query:
           searchFilter.target && searchFilter.targetQuery
             ? searchFilter.targetQuery
-            : "",
+            : searchFilter.query,
       };
 
       const queryString = Object.entries(detailFilter)
@@ -103,9 +88,47 @@ export default function Home() {
         .join("&");
 
       await fetchData(queryString);
-      setSerachFilter((prev) => ({ ...prev, query: "" }));
     },
-    [fetchData, searchFilter]
+    [fetchData, searchFilter, paging]
+  );
+
+  const handleSearch = useCallback(
+    async (e: FormEvent) => {
+      e.preventDefault();
+      setData({});
+      setpaging({ page: 1, size: 10 });
+
+      saveSearchKeyword(searchFilter.query);
+      setKeywords((prev) => {
+        if (prev.length >= 8) {
+          prev.pop();
+        }
+        return [searchFilter.query, ...prev];
+      });
+      setOpenAutoComplete(false);
+      setSerachFilter({
+        query: searchFilter.query,
+      });
+
+      changefilterString({ page: 1, size: 10 });
+    },
+    [saveSearchKeyword, searchFilter.query, changefilterString]
+  );
+
+  const handleDetailSearch = useCallback(
+    async (e: FormEvent) => {
+      e.preventDefault();
+      setData({});
+      setpaging({ page: 1, size: 10 });
+
+      changefilterString({ page: 1, size: 10 });
+      setSerachFilter((prev) => ({
+        ...prev,
+        query: "",
+        target: undefined,
+      }));
+    },
+    [changefilterString]
   );
 
   const removeSearchKeyword = useCallback(
@@ -129,8 +152,32 @@ export default function Home() {
   }, [getSearchKeyword]);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (paging.page === 1) return;
+
+    changefilterString();
+  }, [paging.page]);
+
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setpaging((prev) => ({
+            ...prev,
+            page: prev.page + 1,
+          }));
+        }
+      },
+      { rootMargin: "100px" }
+    );
+
+    observer.observe(node);
+    return () => {
+      observer.disconnect();
+    };
+  }, [loadMoreRef.current]);
 
   return (
     <>
@@ -191,6 +238,12 @@ export default function Home() {
         </PopoverLayout.Root>
       </div>
       <BookList data={data?.documents} setData={setData} />
+      <div
+        ref={loadMoreRef}
+        className={`py-8 ${
+          data?.documents && data?.documents?.length > 0 ? "block" : "hidden"
+        }`}
+      ></div>
     </>
   );
 }
