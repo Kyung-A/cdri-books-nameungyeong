@@ -1,21 +1,127 @@
 "use client";
-import { useCallback } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Button, PopoverLayout, Search, Selectbox } from "@/shared/ui";
 import { BookList } from "@/features/books/ui";
+import { IBook, IBooksData } from "@/shared/types";
+import axios from "axios";
+
+interface ISearchFilter {
+  query: string;
+  page: number;
+  size: number;
+  target?: string;
+}
 
 export default function Home() {
+  const [searchFilter, setSerachFilter] = useState<ISearchFilter>({
+    query: "",
+    page: 1,
+    size: 10,
+  });
+  const [data, setData] = useState<IBooksData>();
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [isOpenAutoComplete, setOpenAutoComplete] = useState<boolean>(false);
+
+  const fetchData = useCallback(async (search?: string) => {
+    console.log(search);
+    const {
+      data: { documents, meta },
+    } = await axios.get(
+      `${process.env.NEXT_PUBLIC_KAKAO_API_ENDPOINT}search/book?${search}`,
+      {
+        headers: {
+          Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_REST_APP_KEY}`,
+        },
+      }
+    );
+
+    const data = documents.map((v: IBook) => ({
+      ...v,
+      active: false,
+      bookmark: false,
+    }));
+    setData({ documents: data, meta });
+  }, []);
+
+  const getSearchKeyword = useCallback(() => {
+    return localStorage.getItem("keyword") || [];
+  }, []);
+
+  const saveSearchKeyword = useCallback(
+    (keyword: string) => {
+      const keywords = JSON.parse(getSearchKeyword() as string);
+      if (keywords.length >= 8) {
+        keywords.pop();
+      }
+      const result = [keyword, ...keywords];
+      localStorage.setItem("keyword", JSON.stringify(result));
+    },
+    [getSearchKeyword]
+  );
+
+  const handleSearch = useCallback(
+    async (e: FormEvent) => {
+      e.preventDefault();
+
+      const queryString = Object.entries(searchFilter)
+        .map(([key, value]) => `${key}=${value}`)
+        .join("&");
+
+      await fetchData(queryString);
+      saveSearchKeyword(searchFilter.query);
+      setKeywords((prev) => {
+        if (prev.length >= 8) {
+          prev.pop();
+        }
+        return [searchFilter.query, ...prev];
+      });
+      setOpenAutoComplete(false);
+    },
+    [fetchData, saveSearchKeyword, searchFilter]
+  );
+
+  const removeSearchKeyword = useCallback(
+    (target: string) => {
+      const keywords = JSON.parse(getSearchKeyword() as string);
+      const newValue = keywords.filter((v) => v !== target);
+      localStorage.setItem("keyword", JSON.stringify(newValue));
+      setKeywords(newValue);
+    },
+    [getSearchKeyword]
+  );
+
   const hanldeSearchFilter = useCallback((e) => {
     console.log(e);
+  }, []);
+
+  useEffect(() => {
+    const keywords = JSON.parse(getSearchKeyword() as string);
+    if (!keywords) return;
+    setKeywords(keywords);
+  }, [getSearchKeyword]);
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
   return (
     <>
       <h1 className="text-[22px] font-bold">도서 검색</h1>
 
-      <div className="flex items-center gap-x-4 mt-4">
-        <div className="w-[480px]">
-          <Search placeholder="검색어를 입력하세요." />
-        </div>
+      <div className="flex gap-x-4 mt-4">
+        <form className="w-[480px]" onSubmit={handleSearch}>
+          <Search
+            placeholder="검색어를 입력하세요."
+            value={searchFilter.query}
+            onChange={(e) =>
+              setSerachFilter((prev) => ({ ...prev, query: e.target.value }))
+            }
+            onRemove={removeSearchKeyword}
+            keywords={keywords}
+            isOpenAutoComplete={isOpenAutoComplete}
+            setOpenAutoComplete={setOpenAutoComplete}
+          />
+        </form>
         <PopoverLayout.Root>
           <PopoverLayout.Trigger
             className="border border-[#8D94A0] text-[#8D94A0] py-[5px] px-[10px] rounded-md font-medium text-sm"
@@ -55,14 +161,7 @@ export default function Home() {
           </PopoverLayout.Content>
         </PopoverLayout.Root>
       </div>
-      {/* <div className="mt-6 flex items-center gap-x-4">
-        <p className="font-medium">도서 검색 결과</p>
-        <p>
-          총 <span className="text-blue-500">{data?.documents?.length}</span>건
-        </p>
-      </div> */}
-
-      <BookList />
+      <BookList data={data?.documents} setData={setData} />
     </>
   );
 }
