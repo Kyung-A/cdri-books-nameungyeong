@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/shared/ui";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Books({ data, handleClickBookmark }) {
   return (
@@ -14,7 +15,13 @@ export default function Books({ data, handleClickBookmark }) {
             <div className="w-full h-full flex py-6">
               <div className="relative">
                 <div className="w-[210px] h-[280px]">
-                  <Image src={book.thumbnail} fill alt="book thumbnail" />
+                  <Image
+                    src={book.thumbnail}
+                    width={210}
+                    height={280}
+                    alt="book thumbnail"
+                    className="w-full h-full"
+                  />
                 </div>
                 <div className="absolute z-10 top-2 right-2">
                   <button type="button" className="cursor-pointer">
@@ -90,11 +97,13 @@ export default function Books({ data, handleClickBookmark }) {
                         </span>
                       </p>
                     )}
-                    <Button
-                      label="구매하기"
-                      styleType="primary"
-                      className="w-full block mt-7 !py-3"
-                    />
+                    <Link
+                      href={book.url}
+                      target="_blank"
+                      className="w-full block mt-7 !py-3 rounded-lg font-medium box-border border bg-[#4880EE] cursor-pointer text-white border-transparent"
+                    >
+                      구매하기
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -117,7 +126,13 @@ export default function Books({ data, handleClickBookmark }) {
                 {book.price.toLocaleString("ko-KR")}원
               </p>
               <div className="flex items-center gap-x-2">
-                <Button label="구매하기" styleType="primary" className="px-7" />
+                <Link
+                  href={book.url}
+                  target="_blank"
+                  className="w-full block py-4 rounded-lg font-medium box-border px-7 border bg-[#4880EE] cursor-pointer text-white border-transparent"
+                >
+                  구매하기
+                </Link>
                 <Button
                   label={
                     <div className="flex items-center">

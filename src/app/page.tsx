@@ -153,7 +153,7 @@ export default function Home() {
         </form>
         <PopoverLayout.Root>
           <PopoverLayout.Trigger
-            className="border border-[#8D94A0] text-[#8D94A0] py-[5px] px-[10px] rounded-md font-medium text-sm flex "
+            className="border mt-2 border-[#8D94A0] text-[#8D94A0] py-[5px] px-[10px] rounded-md font-medium text-sm flex "
             type="button"
           >
             상세검색
