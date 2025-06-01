@@ -19,6 +19,7 @@ export interface IBooksMeta {
   is_end: boolean;
   pageable_count: number;
   total_count: number;
+  page?: number;
 }
 
 export interface IBooksData {

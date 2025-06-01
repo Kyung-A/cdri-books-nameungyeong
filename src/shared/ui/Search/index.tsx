@@ -34,7 +34,6 @@ const Search = forwardRef<HTMLInputElement, ISearchProps>(
   ) => {
     const triggerRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
-    const optionRefs = useRef<(HTMLLIElement | null)[]>([]);
 
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
@@ -42,13 +41,6 @@ const Search = forwardRef<HTMLInputElement, ISearchProps>(
       if (e.key === "ArrowDown") {
         setHighlightedIndex((prev) => {
           const nextIndex = prev < keywords.length - 1 ? prev + 1 : prev;
-
-          if (optionRefs.current[nextIndex]) {
-            optionRefs.current[nextIndex]?.scrollIntoView({
-              block: "nearest",
-              behavior: "smooth",
-            });
-          }
           return nextIndex;
         });
       } else if (e.key === "ArrowUp") {
@@ -95,20 +87,20 @@ const Search = forwardRef<HTMLInputElement, ISearchProps>(
                 <li
                   key={`${keyword}-${idx}`}
                   className="flex items-center justify-between"
-                  onMouseDown={() => {
-                    setOpenAutoComplete(false);
-                  }}
                   onMouseEnter={() => setHighlightedIndex(idx)}
                 >
-                  <span
-                    className={`block w-full ${
+                  <button
+                    className={`block w-full cursor-pointer text-left ${
                       idx === highlightedIndex
                         ? "text-blue-500 font-semibold hover:text-blue-500 hover:font-semibold"
                         : "text-[#8D94A0]"
                     }`}
+                    onClick={() => {
+                      onCustomChange(keyword);
+                    }}
                   >
                     {keyword}
-                  </span>
+                  </button>
                   <button
                     type="button"
                     onClick={() => onRemove(keyword)}

@@ -23,9 +23,12 @@ export default function SelectBox({
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const handleSelect = useCallback((optionValue: string) => {
-    onChange(optionValue);
-  }, []);
+  const handleSelect = useCallback(
+    (optionValue: string) => {
+      onChange(optionValue);
+    },
+    [onChange]
+  );
 
   useEffect(() => {
     if (!value || value === "") {

@@ -1,31 +1,26 @@
 "use client";
-import { BookList } from "@/features/books/ui";
-import { IBook, IBooksData } from "@/shared/types";
+import { BookMarkList } from "@/features/books/ui";
+import { IBook } from "@/shared/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function Home() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const totalCount = useRef<number>(0);
 
-  const [data, setData] = useState<IBooksData>();
+  const [data, setData] = useState<IBook[]>();
   const [paging, setpaging] = useState<number>(1);
 
   const fetchData = useCallback(async () => {
     const result = JSON.parse(localStorage.getItem("bookmark") as string);
+    if (!result) return;
 
     const data = result.map((v: IBook) => ({
       ...v,
       active: false,
       bookmark: true,
     }));
-
-    setData({
-      documents: data.slice(0, 10 * paging),
-      meta: {
-        is_end: false,
-        pageable_count: 0,
-        total_count: 0,
-      },
-    });
+    totalCount.current = data.length;
+    setData(data.slice(0, 10 * paging));
   }, [paging]);
 
   useEffect(() => {
@@ -60,12 +55,14 @@ export default function Home() {
   return (
     <>
       <h1 className="text-[22px] font-bold">내가 찜한 책</h1>
-      <BookList data={data?.documents} setData={setData} />
+      <BookMarkList
+        data={data}
+        setData={setData}
+        totalCount={totalCount.current}
+      />
       <div
         ref={loadMoreRef}
-        className={`py-8 ${
-          data?.documents && data?.documents?.length > 0 ? "block" : "hidden"
-        }`}
+        className={`py-8 ${data && data?.length > 0 ? "block" : "hidden"}`}
       ></div>
     </>
   );

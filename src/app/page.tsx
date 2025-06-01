@@ -1,15 +1,17 @@
 "use client";
-import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Button, PopoverLayout, Search, Selectbox } from "@/shared/ui";
-import { BookList } from "@/features/books/ui";
-import { IBook, IBooksData } from "@/shared/types";
-import axios from "axios";
 import { filterOptions } from "@/shared/consts";
-
-interface IPaging {
-  page: number;
-  size: number;
-}
+import { useBooks } from "@/features/books/queries";
+import { BookList } from "@/features/books/ui";
+import { IBook } from "@/shared/types";
 
 interface ISearchFilter {
   query: string;
@@ -24,36 +26,16 @@ export default function Home() {
   const [searchFilter, setSerachFilter] = useState<ISearchFilter>({
     query: "",
   });
-  const [paging, setpaging] = useState<IPaging>({
-    page: 1,
-    size: 10,
-  });
-  const [data, setData] = useState<IBooksData>();
+
   const [keywords, setKeywords] = useState<string[]>([]);
   const [isOpenAutoComplete, setOpenAutoComplete] = useState<boolean>(false);
+  const [filters, setFilter] = useState<string>("");
 
-  const fetchData = useCallback(async (search?: string) => {
-    const {
-      data: { documents, meta },
-    } = await axios.get(
-      `${process.env.NEXT_PUBLIC_KAKAO_API_ENDPOINT}search/book?${search}`,
-      {
-        headers: {
-          Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_REST_APP_KEY}`,
-        },
-      }
-    );
-
-    const data = documents.map((v: IBook) => ({
-      ...v,
-      active: false,
-      bookmark: false,
-    }));
-    setData((prev) => ({
-      documents: prev?.documents ? [...prev.documents, ...data] : data,
-      meta,
-    }));
-  }, []);
+  const { data, fetchNextPage } = useBooks(filters);
+  const allData = useMemo(
+    () => (data ? data.pages.flatMap((page) => page.documents) : []),
+    [data]
+  );
 
   const getSearchKeyword = useCallback(() => {
     return localStorage.getItem("keyword");
@@ -65,21 +47,34 @@ export default function Home() {
       if (keywords.length >= 8) {
         keywords.pop();
       }
-      const result = [keyword, ...keywords];
+      const set = new Set([keyword, ...keywords]);
+      const result = [...set];
       localStorage.setItem("keyword", JSON.stringify(result));
     },
     [getSearchKeyword]
   );
 
-  const changefilterString = useCallback(
-    async (page?: IPaging) => {
+  const handleSearch = useCallback(
+    async (e: FormEvent) => {
+      e.preventDefault();
+
+      setSerachFilter({
+        query: searchFilter.query,
+      });
+      setOpenAutoComplete(false);
+      saveSearchKeyword(searchFilter.query);
+      setKeywords((prev) => {
+        const set = new Set([searchFilter.query, ...prev]);
+        const result = [...set];
+
+        if (result.length >= 8) {
+          result.pop();
+        }
+        return result;
+      });
+
       const detailFilter = {
-        ...searchFilter,
-        ...(page ? page : paging),
-        query:
-          searchFilter.target && searchFilter.targetQuery
-            ? searchFilter.targetQuery
-            : searchFilter.query,
+        query: searchFilter.query,
       };
 
       const queryString = Object.entries(detailFilter)
@@ -87,48 +82,33 @@ export default function Home() {
         .map(([key, value]) => `${key}=${value}`)
         .join("&");
 
-      await fetchData(queryString);
+      setFilter(queryString);
     },
-    [fetchData, searchFilter, paging]
-  );
-
-  const handleSearch = useCallback(
-    async (e: FormEvent) => {
-      e.preventDefault();
-      setData({});
-      setpaging({ page: 1, size: 10 });
-
-      saveSearchKeyword(searchFilter.query);
-      setKeywords((prev) => {
-        if (prev.length >= 8) {
-          prev.pop();
-        }
-        return [searchFilter.query, ...prev];
-      });
-      setOpenAutoComplete(false);
-      setSerachFilter({
-        query: searchFilter.query,
-      });
-
-      changefilterString({ page: 1, size: 10 });
-    },
-    [saveSearchKeyword, searchFilter.query, changefilterString]
+    [saveSearchKeyword, searchFilter]
   );
 
   const handleDetailSearch = useCallback(
     async (e: FormEvent) => {
       e.preventDefault();
-      setData({});
-      setpaging({ page: 1, size: 10 });
 
-      changefilterString({ page: 1, size: 10 });
       setSerachFilter((prev) => ({
         ...prev,
         query: "",
-        target: undefined,
       }));
+
+      const detailFilter = {
+        ...searchFilter,
+        query: searchFilter.targetQuery,
+      };
+
+      const queryString = Object.entries(detailFilter)
+        .filter(([key]) => key !== "targetQuery")
+        .map(([key, value]) => `${key}=${value}`)
+        .join("&");
+
+      setFilter(queryString);
     },
-    [changefilterString]
+    [searchFilter]
   );
 
   const removeSearchKeyword = useCallback(
@@ -152,22 +132,13 @@ export default function Home() {
   }, [getSearchKeyword]);
 
   useEffect(() => {
-    if (paging.page === 1) return;
-
-    changefilterString();
-  }, [paging.page]);
-
-  useEffect(() => {
     const node = loadMoreRef.current;
     if (!node) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setpaging((prev) => ({
-            ...prev,
-            page: prev.page + 1,
-          }));
+          fetchNextPage();
         }
       },
       { rootMargin: "100px" }
@@ -177,7 +148,7 @@ export default function Home() {
     return () => {
       observer.disconnect();
     };
-  }, [loadMoreRef.current]);
+  }, [fetchNextPage]);
 
   return (
     <>
@@ -237,11 +208,11 @@ export default function Home() {
           </PopoverLayout.Content>
         </PopoverLayout.Root>
       </div>
-      <BookList data={data?.documents} setData={setData} />
+      <BookList data={allData as IBook[]} filters={filters} />
       <div
         ref={loadMoreRef}
         className={`py-8 ${
-          data?.documents && data?.documents?.length > 0 ? "block" : "hidden"
+          allData && allData?.length > 0 ? "block" : "hidden"
         }`}
       ></div>
     </>
