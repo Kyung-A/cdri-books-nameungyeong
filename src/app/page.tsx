@@ -12,7 +12,7 @@ import { filterOptions } from "@/shared/consts";
 import { useBooks } from "@/features/books/queries";
 import { BookList } from "@/features/books/ui";
 import { IBook } from "@/shared/types";
-import { usePopoverContext } from "@/shared/hooks";
+import { useInfiniteScroll, usePopoverContext } from "@/shared/hooks";
 
 interface ISearchFilter {
   query: string;
@@ -28,7 +28,6 @@ export default function Home() {
   const [searchFilter, setSerachFilter] = useState<ISearchFilter>({
     query: "",
   });
-
   const [keywords, setKeywords] = useState<string[]>([]);
   const [isOpenAutoComplete, setOpenAutoComplete] = useState<boolean>(false);
   const [filters, setFilter] = useState<string>("");
@@ -134,24 +133,7 @@ export default function Home() {
     setKeywords(keywords);
   }, [getSearchKeyword]);
 
-  useEffect(() => {
-    const node = loadMoreRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          fetchNextPage();
-        }
-      },
-      { rootMargin: "100px" }
-    );
-
-    observer.observe(node);
-    return () => {
-      observer.disconnect();
-    };
-  }, [fetchNextPage]);
+  useInfiniteScroll(loadMoreRef, fetchNextPage);
 
   return (
     <>

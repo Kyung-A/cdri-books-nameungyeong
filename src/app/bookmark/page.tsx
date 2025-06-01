@@ -1,7 +1,9 @@
 "use client";
-import { BookMarkList } from "@/features/books/ui";
-import { IBook } from "@/shared/types";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { BookMarkList } from "@/features/books/ui";
+import { useInfiniteScroll } from "@/shared/hooks";
+import { IBook } from "@/shared/types";
 
 export default function Home() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -33,24 +35,7 @@ export default function Home() {
     fetchData();
   }, [paging]);
 
-  useEffect(() => {
-    const node = loadMoreRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setpaging((prev) => prev + 1);
-        }
-      },
-      { rootMargin: "100px" }
-    );
-
-    observer.observe(node);
-    return () => {
-      observer.disconnect();
-    };
-  }, [loadMoreRef.current]);
+  useInfiniteScroll(loadMoreRef, () => setpaging((prev) => prev + 1));
 
   return (
     <>
