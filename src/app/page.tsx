@@ -12,6 +12,7 @@ import { filterOptions } from "@/shared/consts";
 import { useBooks } from "@/features/books/queries";
 import { BookList } from "@/features/books/ui";
 import { IBook } from "@/shared/types";
+import { usePopoverContext } from "@/shared/hooks";
 
 interface ISearchFilter {
   query: string;
@@ -22,6 +23,7 @@ interface ISearchFilter {
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const { setOpen } = usePopoverContext();
 
   const [searchFilter, setSerachFilter] = useState<ISearchFilter>({
     query: "",
@@ -107,6 +109,7 @@ export default function Home() {
         .join("&");
 
       setFilter(queryString);
+      setOpen(false);
     },
     [searchFilter]
   );

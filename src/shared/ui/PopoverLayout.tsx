@@ -1,39 +1,10 @@
 "use client";
-import {
-  createContext,
-  useContext,
-  useState,
-  useRef,
-  type ReactNode,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
+import { useRef, type ReactNode } from "react";
 import Image from "next/image";
-import { useClickOutside } from "../hooks";
-
-interface IPopoverContextProps {
-  open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-  triggerRef: React.RefObject<HTMLButtonElement | null>;
-}
-
-const PopoverContext = createContext<IPopoverContextProps | null>(null);
-
-export function usePopoverContext() {
-  const context = useContext(PopoverContext);
-  if (!context) throw new Error("Must be used inside PopoverLayout");
-  return context;
-}
+import { useClickOutside, usePopoverContext } from "../hooks";
 
 function Root({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-
-  return (
-    <PopoverContext.Provider value={{ open, setOpen, triggerRef }}>
-      <div className="relative">{children}</div>
-    </PopoverContext.Provider>
-  );
+  return <div className="relative">{children}</div>;
 }
 
 function Trigger({
