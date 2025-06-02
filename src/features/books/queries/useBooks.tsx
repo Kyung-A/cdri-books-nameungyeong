@@ -10,11 +10,22 @@ export function useBooks(filters: string) {
         `${filters}&page=${pageParam}&size=10`
       );
 
-      const result = documents.map((v: IBook) => ({
+      const data = documents.map((v: IBook) => ({
         ...v,
         active: false,
         bookmark: false,
       }));
+
+      const raw = localStorage.getItem("bookmark");
+      const list: IBook[] = raw ? JSON.parse(raw) : [];
+
+      const result = data.map((origin: IBook) => {
+        const isBookmarked = list.some((local) => local.url === origin.url);
+        return {
+          ...origin,
+          bookmark: isBookmarked,
+        };
+      });
 
       return {
         documents: result,
