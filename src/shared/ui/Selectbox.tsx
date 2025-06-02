@@ -59,7 +59,7 @@ export default function SelectBox({
           {options.map((opt) => (
             <li
               key={opt.value}
-              className={`px-3 py-2 cursor-pointer text-[#8D94A0] text-sm ${
+              className={`px-3 py-2 cursor-pointer text-subtitle text-sm ${
                 opt.value === value ? "bg-gray-100 font-bold" : ""
               }`}
               onMouseDown={() => handleSelect(opt.value)}

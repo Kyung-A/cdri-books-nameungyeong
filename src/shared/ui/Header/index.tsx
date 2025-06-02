@@ -19,7 +19,7 @@ export default function Header() {
                 key={menu.href}
                 className={`font-medium relative ${
                   menu.href === pathname
-                    ? "after:absolute after:-bottom-1 after:block after:w-full after:h-px after:bg-[#4880EE]"
+                    ? "after:absolute after:-bottom-1 after:block after:w-full after:h-px after:bg-palette-primary"
                     : ""
                 }`}
               >

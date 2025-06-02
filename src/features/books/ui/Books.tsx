@@ -66,7 +66,7 @@ export default function Books({
                 <div className="w-[360px] shrink-0 ml-8 mr-12">
                   <div className="flex items-center gap-x-4">
                     <p className="font-bold text-lg">{book.title}</p>
-                    <p className="font-medium text-[#6D7582] text-sm">
+                    <p className="font-medium text-secondary text-sm">
                       {book.authors.join(", ")}
                     </p>
                   </div>
@@ -79,7 +79,7 @@ export default function Books({
                   <Button
                     label={
                       <div className="flex items-center">
-                        <span className="text-[#6D7582] mr-1">상세보기</span>
+                        <span className="text-secondary mr-1">상세보기</span>
                         <Image
                           width={14}
                           height={8}
@@ -95,7 +95,7 @@ export default function Books({
                   />
                   <div className="w-full">
                     <p className="text-end">
-                      <span className="text-[#8D94A0] font-medium text-[10px]">
+                      <span className="text-subtitle font-medium text-[10px]">
                         원가
                       </span>
                       <span
@@ -108,7 +108,7 @@ export default function Books({
                     </p>
                     {book.sale_price && (
                       <p className="text-end">
-                        <span className="text-[#8D94A0] font-medium text-[10px]">
+                        <span className="text-subtitle font-medium text-[10px]">
                           할인가
                         </span>
                         <span className="font-bold text-lg ml-2">
@@ -119,7 +119,7 @@ export default function Books({
                     <Link
                       href={book.url}
                       target="_blank"
-                      className="w-full block mt-7 !py-3 rounded-lg font-medium box-border border bg-[#4880EE] cursor-pointer text-white border-transparent text-center"
+                      className="w-full block mt-7 !py-3 rounded-lg font-medium box-border border bg-palette-primary cursor-pointer text-white border-transparent text-center"
                     >
                       구매하기
                     </Link>
@@ -144,7 +144,7 @@ export default function Books({
               </div>
               <div className="flex items-center justify-start w-full max-w-[408px] gap-x-4">
                 <p className="font-bold text-lg">{book.title}</p>
-                <p className="font-medium text-[#6D7582] text-sm">
+                <p className="font-medium text-secondary text-sm">
                   {book.authors.join(", ")}
                 </p>
               </div>
@@ -155,14 +155,14 @@ export default function Books({
                 <Link
                   href={book.url}
                   target="_blank"
-                  className="w-full block py-4 rounded-lg font-medium box-border px-7 border bg-[#4880EE] cursor-pointer text-white border-transparent"
+                  className="w-full block py-4 rounded-lg font-medium box-border px-7 border bg-palette-primary cursor-pointer text-white border-transparent"
                 >
                   구매하기
                 </Link>
                 <Button
                   label={
                     <div className="flex items-center">
-                      <span className="text-[#6D7582] mr-1">상세보기</span>
+                      <span className="text-secondary mr-1">상세보기</span>
                       <Image
                         width={14}
                         height={8}

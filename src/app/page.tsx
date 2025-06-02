@@ -128,7 +128,7 @@ export default function Home() {
         </form>
         <PopoverLayout.Root>
           <PopoverLayout.Trigger
-            className="border mt-2 border-[#8D94A0] text-[#8D94A0] py-[5px] px-[10px] rounded-md font-medium text-sm flex "
+            className="border mt-2 border-subtitle text-subtitle py-[5px] px-[10px] rounded-md font-medium text-sm flex "
             type="button"
           >
             상세검색
@@ -144,7 +144,7 @@ export default function Home() {
                 />
                 <input
                   type="search"
-                  className="border-b border-[#4880EE] outline-black w-[208px] p-2 text-sm placeholder:text-[#8D94A0]"
+                  className="border-b border-palette-primary outline-black w-[208px] p-2 text-sm placeholder:text-subtitle"
                   placeholder="검색어 입력"
                   value={detailFilters.query}
                   onChange={(e) =>

@@ -7,7 +7,7 @@ import { useToggleBookmark, useToggleDetail } from "../queries";
 
 interface IBooksContainer {
   data?: IBook[];
-  totalCount: number;
+  totalCount?: number;
   filters?: ISearchFilter;
 }
 

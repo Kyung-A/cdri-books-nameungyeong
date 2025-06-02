@@ -7,3 +7,13 @@ body, html {
   color: #1A1E27;
   font-size: 16px;
 }
+
+@theme {
+  --color-primary: #353C49;
+  --color-secondary: #6D7582;
+  --color-subtitle: #8D94A0;
+  --color-palette-primary: #4880EE;
+  --color-palette-red: #E84118;
+  --color-palette-gray: #DADADA;
+  --color-palette-lightGray: #F2F4F6;
+}

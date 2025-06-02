@@ -10,8 +10,9 @@ export default function Button({
   ...props
 }: IButtonProps) {
   const buttonStyle = {
-    primary: "border bg-[#4880EE] cursor-pointer text-white border-transparent",
-    ghost: "border bg-[#F2F4F6] cursor-pointer border-transparent",
+    primary:
+      "border bg-palette-primary cursor-pointer text-white border-transparent",
+    ghost: "border bg-palette-lightGray cursor-pointer border-transparent",
   };
 
   return (

@@ -65,7 +65,7 @@ const Search = forwardRef<HTMLInputElement, ISearchProps>(
 
     return (
       <div
-        className={`bg-[#F2F4F6] w-full ${
+        className={`bg-palette-lightGray w-full ${
           isOpenAutoComplete ? "rounded-3xl" : "rounded-full"
         }`}
       >
@@ -74,7 +74,7 @@ const Search = forwardRef<HTMLInputElement, ISearchProps>(
           <input
             ref={ref}
             type="search"
-            className="ml-1.5 w-full placeholder:text-[#8D94A0] outline-none"
+            className="ml-1.5 w-full placeholder:text-subtitle outline-none"
             onClick={() => setOpenAutoComplete(true)}
             onFocus={() => setOpenAutoComplete(true)}
             onChange={(e) => {
@@ -99,7 +99,7 @@ const Search = forwardRef<HTMLInputElement, ISearchProps>(
                     className={`block w-full text-left ${
                       idx === highlightedIndex
                         ? "text-blue-500 font-semibold"
-                        : "text-[#8D94A0]"
+                        : "text-subtitle"
                     }`}
                   >
                     {keyword}
