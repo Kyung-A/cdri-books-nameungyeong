@@ -92,10 +92,8 @@ const Search = forwardRef<HTMLInputElement, ISearchProps>(
                 <li
                   key={`${keyword}-${idx}`}
                   className="flex items-center justify-between"
-                  onMouseEnter={() => setHighlightedIndex(idx)}
                 >
-                  <button
-                    type="button"
+                  <p
                     className={`block w-full text-left ${
                       idx === highlightedIndex
                         ? "text-blue-500 font-semibold"
@@ -103,7 +101,7 @@ const Search = forwardRef<HTMLInputElement, ISearchProps>(
                     }`}
                   >
                     {keyword}
-                  </button>
+                  </p>
                   <button
                     type="button"
                     onClick={() => onRemove(keyword)}
