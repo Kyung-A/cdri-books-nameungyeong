@@ -11,31 +11,28 @@ import { Button, PopoverLayout, Search, Selectbox } from "@/shared/ui";
 import { filterOptions } from "@/shared/consts";
 import { useBooks } from "@/features/books/queries";
 import { BookList } from "@/features/books/ui";
-import { IBook } from "@/shared/types";
+import { IBook, ISearchFilter } from "@/shared/types";
 import { useInfiniteScroll, usePopoverContext } from "@/shared/hooks";
-
-interface ISearchFilter {
-  query: string;
-  target?: string;
-  targetQuery?: string;
-}
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { setOpen } = usePopoverContext();
 
-  const [searchFilter, setSerachFilter] = useState<ISearchFilter>({
-    query: "",
-  });
+  const [searchInput, setSearchInput] = useState<string>("");
+  const [detailFilters, setDetailFilters] = useState({ target: "", query: "" });
   const [keywords, setKeywords] = useState<string[]>([]);
   const [isOpenAutoComplete, setOpenAutoComplete] = useState<boolean>(false);
-  const [filters, setFilter] = useState<string>("");
+  const [filters, setFilter] = useState<ISearchFilter>();
 
   const { data, fetchNextPage } = useBooks(filters);
   const allData = useMemo(
     () => (data ? data.pages.flatMap((page) => page.documents) : []),
     [data]
+  );
+  const totalCount = useMemo(
+    () => data?.pages[0].meta?.total_count,
+    [data?.pages]
   );
 
   const getSearchKeyword = useCallback(() => {
@@ -59,13 +56,10 @@ export default function Home() {
     async (e: FormEvent) => {
       e.preventDefault();
 
-      setSerachFilter({
-        query: searchFilter.query,
-      });
       setOpenAutoComplete(false);
-      saveSearchKeyword(searchFilter.query);
+      saveSearchKeyword(searchInput);
       setKeywords((prev) => {
-        const set = new Set([searchFilter.query, ...prev]);
+        const set = new Set([searchInput, ...prev]);
         const result = [...set];
 
         if (result.length >= 8) {
@@ -74,43 +68,21 @@ export default function Home() {
         return result;
       });
 
-      const detailFilter = {
-        query: searchFilter.query,
-      };
-
-      const queryString = Object.entries(detailFilter)
-        .filter(([key]) => key !== "targetQuery")
-        .map(([key, value]) => `${key}=${value}`)
-        .join("&");
-
-      setFilter(queryString);
+      setDetailFilters({ target: "", query: "" });
+      setFilter({ query: searchInput });
     },
-    [saveSearchKeyword, searchFilter]
+    [saveSearchKeyword, searchInput]
   );
 
   const handleDetailSearch = useCallback(
     async (e: FormEvent) => {
       e.preventDefault();
 
-      setSerachFilter((prev) => ({
-        ...prev,
-        query: "",
-      }));
-
-      const detailFilter = {
-        ...searchFilter,
-        query: searchFilter.targetQuery,
-      };
-
-      const queryString = Object.entries(detailFilter)
-        .filter(([key]) => key !== "targetQuery")
-        .map(([key, value]) => `${key}=${value}`)
-        .join("&");
-
-      setFilter(queryString);
+      setSearchInput("");
+      setFilter(detailFilters);
       setOpen(false);
     },
-    [searchFilter]
+    [detailFilters, setOpen]
   );
 
   const removeSearchKeyword = useCallback(
@@ -124,7 +96,7 @@ export default function Home() {
   );
 
   const handleSearchFilter = useCallback((value: string) => {
-    setSerachFilter((prev) => ({ ...prev, query: "", target: value }));
+    setDetailFilters((prev) => ({ ...prev, target: value }));
   }, []);
 
   useEffect(() => {
@@ -143,10 +115,10 @@ export default function Home() {
         <form className="w-[480px]" onSubmit={handleSearch}>
           <Search
             placeholder="검색어를 입력하세요."
-            value={searchFilter.query}
-            onCustomChange={(e) =>
-              setSerachFilter((prev) => ({ ...prev, query: e }))
-            }
+            value={searchInput}
+            onCustomChange={(e) => {
+              setSearchInput(e);
+            }}
             onRemove={removeSearchKeyword}
             keywords={keywords}
             isOpenAutoComplete={isOpenAutoComplete}
@@ -165,7 +137,7 @@ export default function Home() {
             <form onSubmit={handleDetailSearch}>
               <div className="flex gap-x-1 mt-2">
                 <Selectbox
-                  value={searchFilter.target}
+                  value={detailFilters.target}
                   onChange={handleSearchFilter}
                   options={filterOptions}
                   className="w-[100px]"
@@ -174,11 +146,11 @@ export default function Home() {
                   type="search"
                   className="border-b border-[#4880EE] outline-black w-[208px] p-2 text-sm placeholder:text-[#8D94A0]"
                   placeholder="검색어 입력"
-                  value={searchFilter.targetQuery || ""}
+                  value={detailFilters.query}
                   onChange={(e) =>
-                    setSerachFilter((prev) => ({
+                    setDetailFilters((prev) => ({
                       ...prev,
-                      targetQuery: e.target.value,
+                      query: e.target.value,
                     }))
                   }
                 />
@@ -193,7 +165,11 @@ export default function Home() {
           </PopoverLayout.Content>
         </PopoverLayout.Root>
       </div>
-      <BookList data={allData as IBook[]} filters={filters} />
+      <BookList
+        data={allData as IBook[]}
+        totalCount={totalCount}
+        filters={filters}
+      />
       <div
         ref={loadMoreRef}
         className={`py-8 ${

@@ -1,8 +1,8 @@
-import { IBook, IBooksMeta } from "@/shared/types";
+import { IBook, IBooksMeta, ISearchFilter } from "@/shared/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface IToggleDetail {
-  filters?: string;
+  filters?: ISearchFilter;
   book: IBook;
 }
 

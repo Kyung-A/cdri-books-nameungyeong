@@ -38,6 +38,7 @@ const Search = forwardRef<HTMLInputElement, ISearchProps>(
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      setOpenAutoComplete(true);
       if (e.key === "ArrowDown") {
         setHighlightedIndex((prev) => {
           const nextIndex = prev < keywords.length - 1 ? prev + 1 : prev;
@@ -51,6 +52,7 @@ const Search = forwardRef<HTMLInputElement, ISearchProps>(
       } else if (e.key === "Enter" && highlightedIndex >= 0) {
         onCustomChange(keywords[highlightedIndex]);
         setOpenAutoComplete(false);
+        setHighlightedIndex(-1);
       }
     };
 
@@ -74,7 +76,10 @@ const Search = forwardRef<HTMLInputElement, ISearchProps>(
             type="search"
             className="ml-1.5 w-full placeholder:text-[#8D94A0] outline-none"
             onClick={() => setOpenAutoComplete(true)}
-            onChange={(e) => onCustomChange(e.target.value)}
+            onFocus={() => setOpenAutoComplete(true)}
+            onChange={(e) => {
+              onCustomChange(e.target.value);
+            }}
             onKeyDown={handleKeyDown}
             {...props}
           />
@@ -90,14 +95,12 @@ const Search = forwardRef<HTMLInputElement, ISearchProps>(
                   onMouseEnter={() => setHighlightedIndex(idx)}
                 >
                   <button
-                    className={`block w-full cursor-pointer text-left ${
+                    type="button"
+                    className={`block w-full text-left ${
                       idx === highlightedIndex
-                        ? "text-blue-500 font-semibold hover:text-blue-500 hover:font-semibold"
+                        ? "text-blue-500 font-semibold"
                         : "text-[#8D94A0]"
                     }`}
-                    onClick={() => {
-                      onCustomChange(keyword);
-                    }}
                   >
                     {keyword}
                   </button>

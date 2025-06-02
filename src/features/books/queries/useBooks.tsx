@@ -1,14 +1,16 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getBooks } from "../apis";
-import { IBook, IBooksData } from "@/shared/types";
+import { IBook, IBooksData, ISearchFilter } from "@/shared/types";
 
-export function useBooks(filters: string) {
+export function useBooks(filters: ISearchFilter | undefined) {
   return useInfiniteQuery<IBooksData>({
     queryKey: ["books", filters],
     queryFn: async ({ pageParam }): Promise<IBooksData> => {
-      const { documents, meta } = await getBooks(
-        `${filters}&page=${pageParam}&size=10`
-      );
+      const { documents, meta } = await getBooks({
+        ...filters,
+        page: pageParam,
+        size: 10,
+      });
 
       const data = documents.map((v: IBook) => ({
         ...v,

@@ -26,3 +26,8 @@ export interface IBooksData {
   documents?: IBook[];
   meta?: IBooksMeta;
 }
+
+export interface ISearchFilter {
+  query?: string;
+  traget?: string;
+}

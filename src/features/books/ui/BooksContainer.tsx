@@ -1,4 +1,4 @@
-import { IBook } from "@/shared/types";
+import { IBook, ISearchFilter } from "@/shared/types";
 import { useCallback } from "react";
 
 import Books from "./Books";
@@ -7,10 +7,15 @@ import { useToggleBookmark, useToggleDetail } from "../queries";
 
 interface IBooksContainer {
   data?: IBook[];
-  filters?: string;
+  totalCount: number;
+  filters?: ISearchFilter;
 }
 
-export default function BooksContainer({ data, filters }: IBooksContainer) {
+export default function BooksContainer({
+  data,
+  totalCount = 0,
+  filters,
+}: IBooksContainer) {
   const toggleBookmarkMutation = useToggleBookmark();
   const toggleDetailMutation = useToggleDetail();
 
@@ -33,7 +38,7 @@ export default function BooksContainer({ data, filters }: IBooksContainer) {
       <div className="mt-6 flex items-center gap-x-4">
         <p className="font-medium">도서 검색 결과</p>
         <p>
-          총 <span className="text-blue-500">{data?.length || 0}</span>건
+          총 <span className="text-blue-500">{totalCount}</span>건
         </p>
       </div>
       {data && data.length > 0 ? (
