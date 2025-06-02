@@ -7,32 +7,40 @@ import { IBook } from "@/shared/types";
 
 export default function Home() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const totalCount = useRef<number>(0);
+  const totalCount = useRef<IBook[]>([]);
 
   const [data, setData] = useState<IBook[]>();
   const [paging, setpaging] = useState<number>(1);
 
   const fetchData = useCallback(async () => {
-    const result = JSON.parse(localStorage.getItem("bookmark") as string);
-    if (!result) return;
+    const localData = JSON.parse(localStorage.getItem("bookmark") as string);
+    if (!localData) return;
 
-    const data = result.map((v: IBook) => ({
+    const result = localData.map((v: IBook) => ({
       ...v,
       active: false,
       bookmark: true,
     }));
-    totalCount.current = data.length;
-    setData(data.slice(0, 10 * paging));
-  }, [paging]);
+
+    totalCount.current = result;
+    setData(result.slice(0, 10));
+  }, []);
+
+  const loadMoreData = useCallback(() => {
+    if (data?.length === totalCount.current.length) return;
+    setData((prev) => [
+      ...(prev || []),
+      ...totalCount.current.slice((paging - 1) * 10, paging * 10),
+    ]);
+  }, [data?.length, paging]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   useEffect(() => {
     if (paging === 1) return;
-
-    fetchData();
+    loadMoreData();
   }, [paging]);
 
   useInfiniteScroll(loadMoreRef, () => setpaging((prev) => prev + 1));
@@ -43,7 +51,7 @@ export default function Home() {
       <BookMarkList
         data={data}
         setData={setData}
-        totalCount={totalCount.current}
+        totalCount={totalCount.current.length}
       />
       <div
         ref={loadMoreRef}
